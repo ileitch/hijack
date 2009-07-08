@@ -17,10 +17,45 @@ module Hijack
       end
     end
 
+  protected
     def connect
       @remote = DRbObject.new(nil, Hijack.socket_for(@name))
+      mirror_remote
       script, version, platform = @remote.evaluate('[$0, RUBY_VERSION, RUBY_PLATFORM]').result
       puts "=> Hijacked #{@name} (#{script}) (ruby #{version} [#{platform}])"
+    end
+
+    def mirror_remote
+      # Attempt to require all files currently loaded by the remote process so DRb can dump as many objects as possible.
+      str = "=> Mirroring remote process..."
+      $stdout.write(str)
+      $stdout.flush
+      load_path, loaded_files = @remote.evaluate('[$:, $"]').result
+      $:.clear
+      $:.push(*load_path)
+
+      # We have to first require everything in reverse or and the in the original order.
+      # This is because when I require file_a.rb which first sets a constant then requires file_b.rb
+      # the $" array will contain file_b.rb before file_a.rb. But if we require file_b.rb before file_a.rb
+      # we'll get a missing constant error.
+      orig_stderr = $stderr
+      $stderr = File.open('/dev/null')
+      to_load = (loaded_files - $").uniq
+      to_load.reverse.map do |file|
+        begin
+          require file
+        rescue Exception, LoadError
+        end
+      end
+      to_load.map do |file|
+        begin
+          require file
+        rescue Exception, LoadError
+        end
+      end
+      $stderr = orig_stderr
+      $stdout.write("\b" * str.size)
+      $stdout.flush
     end
 
     def start_irb
