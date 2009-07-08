@@ -1,11 +1,4 @@
 #!/usr/bin/env ruby
-
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'hijack'
-
-# DRb.start_service(nil, nil, {})
-remote = DRbObject.new(nil, Hijack.socket_for(ARGV[0]))
-evaluation = remote.evaluate("puts 'weeee'; puts 'ooommgggg'; self.class.name")
-puts "=> " + evaluation.output
-puts "=> " + evaluation.result.inspect
-
+Hijack::Console.start(ARGV[0])
