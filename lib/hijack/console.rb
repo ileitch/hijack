@@ -34,8 +34,8 @@ module Hijack
       $:.clear
       $:.push(*load_path)
 
-      # We have to first require everything in reverse or and the in the original order.
-      # This is because when I require file_a.rb which first sets a constant then requires file_b.rb
+      # We have to first require everything in reverse order and then in the original order.
+      # This is because when you require file_a.rb which first sets a constant then requires file_b.rb
       # the $" array will contain file_b.rb before file_a.rb. But if we require file_b.rb before file_a.rb
       # we'll get a missing constant error.
       orig_stderr = $stderr
