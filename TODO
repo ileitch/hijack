@@ -1,1 +1,2 @@
 * Use thread local stdout & stderr capture.
+* There exists a race condition between the time the socket file was created and when more strict chmod flags are set.

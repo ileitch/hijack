@@ -5,6 +5,7 @@ module Hijack
       $stderr.write("Socket file #{socket_for(name)} already exists! Hijack disabled.")
     else
       DRb.start_service(socket_for(name), Context.new(context))
+      File.chmod(0600, Hijack.socket_path_for(name))
     end
   end
 
