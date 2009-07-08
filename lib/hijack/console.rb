@@ -41,7 +41,19 @@ module Hijack
   class DRbWorkspace < IRB::WorkSpace
     attr_accessor :remote
     def evaluate(context, statements, file = __FILE__, line = __LINE__)
-      statements =~ /(IRB\.|exit)/ ? super : remote.evaluate(statements).result
+      if statements =~ /(IRB\.|exit)/
+        super
+      else
+        evaluation = remote.evaluate(statements)
+        if evaluation.kind_of?(DRb::DRbUnknown)
+          puts "=> Hijack: Can't dump an object type that does not exist locally, try inspecting it instead."
+          nil
+        else
+          $stdout.write(evaluation.output)
+          $stdout.flush
+          evaluation.result
+        end
+      end
     end
   end
 end
