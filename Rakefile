@@ -1,9 +1,10 @@
 require 'rubygems'
 require 'rake/gempackagetask'
+require 'lib/hijack/version'
 
 spec = Gem::Specification.new do |s|
   s.name = 'hijack'
-  s.version = '0.1.0'
+  s.version = Hijack.version
   s.platform = Gem::Platform::RUBY
   s.has_rdoc = true
   s.extra_rdoc_files = ['README.rdoc', 'TODO']

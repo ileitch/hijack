@@ -1,4 +1,2 @@
 * Use thread local stdout & stderr capture.
-* There exists a race condition between the time the socket file was created and when more strict chmod flags are set.
-* Catch connection close errors
 * Use provided binding for eval so that we can assign variables on the remote process.

@@ -4,17 +4,23 @@ module Hijack
     if File.exists?(socket_for(name))
       $stderr.write("Socket file #{socket_for(name)} already exists! Hijack disabled.")
     else
-      DRb.start_service(socket_for(name), Context.new(context))
+      evaluator = Evaluator.new(context)
+      DRb.start_service(socket_for(name), evaluator)
       File.chmod(0600, Hijack.socket_path_for(name))
+      evaluator.enabled = true
     end
   end
 
-  class Context
+  class Evaluator
+    attr_writer :enabled
+
     def initialize(context)
       @context = context
+      @enabled = false
     end
 
     def evaluate(rb)
+      return unless @enabled
       output = StringIO.new
       $stdout = output
       Evaluation.new(@context.instance_eval(rb), output.string)
