@@ -1,0 +1,33 @@
+= Hijack: Provides an irb session to an existing ruby process.
+
+== Intro
+
+Hijack allows you to connect to long running Hijack enabled processes and execute code as if it were a normal Irb session. Hijack allows you to debug or monitor a running processes on the fly - Hijack does not interrupt the normal execution of the remote process.
+
+Hijack uses DRb over a unix socket file, so you need to be on the same machine as the process you want to hijack. This is by design for security reasons. You also need to run the hijack client as the same user as the remote process.
+
+== Example
+
+An example is provided in the example/ directory. Simply run example.rb and then connect to it with 'hijack Example' in another terminal. The example process does nothing but loop over a sleep call.
+
+== Using Hijack
+
+To enable Hijack in a process which you want to connect to, add the following code to the boot/initialization section of your app.
+
+require 'hijack'
+Hijack.provide(self)
+
+Once your app is running, you will be able to connect to it with 'hijack <process ID>'. To use an identifier instead of the process ID like the example does, pass in the :name option to Hijack#provide:
+
+Hijack.provide(self, :name => 'HijackMe')
+
+== Process Mirroring
+
+DRb cannot dump objects to the Hijack client for types that are not loaded in the client process. E.g if the remote process had required ActiveRecord and you tried to dump ActiveRecord::Base back to the client, DRb would instead return a DRb::Unknown object as ActiveRecord
+isn't loaded in the Hijack client.
+
+To work around this, when Hijack connects to a remote process it will inspect all the files required by the process and also attempt to require them itself. This may not work for all object types however so you may still get a warning when an object cannot be dumped.
+
+
+
+
