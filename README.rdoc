@@ -1,25 +1,20 @@
 = Hijack: Provides an irb session to an existing ruby process.
 
+WARNING: Hijack is new code, I'd think twice about trying it out on your critical production systems. I'd love to get some feedback though so if you have any staging systems to try it out on then please do... ;)
+
 == Intro
 
-Hijack allows you to connect to long running Hijack enabled processes and execute code as if it were a normal Irb session. Hijack allows you to debug or monitor a running processes on the fly - Hijack does not interrupt the normal execution of the remote process.
+Hijack allows you to connect to any ruby process and execute code as if it were a normal Irb session. Hijack does not require your target process to require any hijack code, Hijack is able to connect to any ruby process. It achieves this by using gdb to inject a payload into the process which starts up a DRb server, Hijack then detaches gdb and reconnects via DRb. Please note that gdb will halt your target process while it is attached, though the injection process is very quick and your process should only be halted for a few milliseconds.
 
 Hijack uses DRb over a unix socket file, so you need to be on the same machine as the process you want to hijack. This is by design for security reasons. You also need to run the hijack client as the same user as the remote process.
 
-== Example
-
-An example is provided in the example/ directory. Simply run example.rb and then connect to it with 'hijack Example' in another terminal. The example process does nothing but loop over a sleep call.
-
 == Using Hijack
 
-To enable Hijack in a process which you want to connect to, add the following code to the boot/initialization section of your app.
-
-require 'hijack'
-Hijack.provide(self)
-
-Once your app is running, you will be able to connect to it with 'hijack <process ID>'. To use an identifier instead of the process ID like the example does, pass in the :name option to Hijack#provide:
-
-Hijack.provide(self, :name => 'HijackMe')
+$ ruby hijack 16451
+=> Hijacking...
+=> Mirroring: 100%
+=> Hijacked 16451 (my_script.rb) (ruby 1.8.7 [i686-darwin9])
+>> 
 
 == Process Mirroring
 
@@ -27,7 +22,3 @@ DRb cannot dump objects to the Hijack client for types that are not loaded in th
 isn't loaded in the Hijack client.
 
 To work around this, when Hijack connects to a remote process it will inspect all the files required by the process and also attempt to require them itself. This may not work for all object types however so you may still get a warning when an object cannot be dumped.
-
-
-
-

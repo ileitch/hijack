@@ -1,2 +1,4 @@
 * Use thread local stdout & stderr capture.
-* Use provided binding for eval so that we can assign variables on the remote process.
+* assigning a variable doesn't work
+* see TODO in Payload#payload
+* Improve startup experience

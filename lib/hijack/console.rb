@@ -1,34 +1,39 @@
-require 'irb'
-
 module Hijack
   class Console
-    def self.start(name)
-      new(name)
+    def self.start(pid)
+      new(pid)
     end
 
-    def initialize(name)
-      @name = name
+    def initialize(pid)
+      @pid = pid
       @remote = nil
-      if File.exists?(Hijack.socket_path_for(@name))
-        connect
-        start_irb
-      else
-        puts "=> Unable to connect: #{Hijack.socket_path_for(@name)} does not exist!"
-      end
+      str = "=> Hijacking..."
+      $stdout.write(str)
+      $stdout.flush
+      Payload.inject(@pid)
+      signal_drb_start
+      connect
+      $stdout.write("\b" * str.size)
+      $stdout.flush
+      mirror_process
+      banner
+      start_irb
     end
 
   protected
-    def connect
-      @remote = DRbObject.new(nil, Hijack.socket_for(@name))
-      mirror_remote
-      script, ruby_version, platform, hijack_version = @remote.evaluate('[$0, RUBY_VERSION, RUBY_PLATFORM, Hijack.version]').result
-      if hijack_version != Hijack.version
-        puts "!! WARNING: Remote process is running #{hijack_version} yet you are connecting with #{Hijack.version}."
+    def signal_drb_start
+      Process.kill('USR1', @pid.to_i)
+      loop do
+        break if File.exists?(Hijack.socket_path_for(@pid))
+        sleep 0.1
       end
-      puts "=> Hijacked #{@name} (#{script}) (ruby #{ruby_version} [#{platform}])"
     end
 
-    def mirror_remote
+    def connect
+      @remote = DRbObject.new(nil, Hijack.socket_for(@pid))
+    end
+
+    def mirror_process
       # Attempt to require all files currently loaded by the remote process so DRb can dump as many objects as possible.
       #
       # We have to first require everything in reverse order and then in the original order.
@@ -39,7 +44,7 @@ module Hijack
       to_load = (loaded_files - $").uniq
       return if to_load.empty?
       completion_percentage = 0
-      str = '=> Mirroring remote process: '
+      str = '=> Mirroring: '
       percent_str = ''
       $stdout.write(str)
       $stdout.flush
@@ -66,9 +71,9 @@ module Hijack
     def start_irb
       ARGV.replace ["--simple-prompt"]
       IRB.setup(nil)
-      workspace = DRbWorkspace.new
+      workspace = Hijack::Workspace.new
       workspace.remote = @remote
-      workspace.remote_name = @name
+      workspace.pid = @pid
       irb = IRB::Irb.new(workspace)
       @CONF = IRB.instance_variable_get(:@CONF)
       @CONF[:IRB_RC].call irb.context if @CONF[:IRB_RC]
@@ -77,33 +82,10 @@ module Hijack
       trap('SIGINT') { irb.signal_handle }
       catch(:IRB_EXIT) { irb.eval_input }
     end
-  end
 
-  class DRbWorkspace < IRB::WorkSpace
-    attr_accessor :remote, :remote_name
-    def evaluate(context, statements, file = __FILE__, line = __LINE__)
-      if statements =~ /(IRB\.|exit)/
-        super
-      else
-        begin
-          evaluation = remote.evaluate(statements)
-        rescue DRb::DRbConnError
-          puts "=> Lost connection to #{@remote_name}!"
-          exit 1
-        end
-        if evaluation.kind_of?(DRb::DRbUnknown)
-          puts "=> Hijack: Can't dump an object type that does not exist locally, try inspecting it instead."
-          nil
-        else
-          $stdout.write(evaluation.output)
-          $stdout.flush
-          evaluation.result
-        end
-      end
+    def banner
+      script, ruby_version, platform, hijack_version = @remote.evaluate('[$0, RUBY_VERSION, RUBY_PLATFORM]').result
+      puts "=> Hijacked #{@pid} (#{script}) (ruby #{ruby_version} [#{platform}])"
     end
   end
 end
-
-
-
-
