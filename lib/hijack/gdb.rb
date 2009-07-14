@@ -2,8 +2,8 @@
 
 module Hijack
   class GDB
-    def initialize(pid, verbose=false)
-      @verbose = verbose
+    def initialize(pid)
+      @verbose = Hijack.options[:gdb_debug]
       exec_path = File.join(Config::CONFIG['bindir'], Config::CONFIG['RUBY_INSTALL_NAME'] + Config::CONFIG['EXEEXT'])
       @gdb = IO.popen("gdb -q #{exec_path} #{pid} 2>&1", 'r+')
       wait

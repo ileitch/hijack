@@ -1,4 +1,14 @@
 #!/usr/bin/env ruby
+require 'optparse'
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'hijack'
-Hijack::Console.start(ARGV[0])
+
+options = {}
+ARGV.clone.options do |opts|
+  opts.banner = 'Usage: hijack [options] <PID>'
+  opts.on("--gdb-debug", "Print gdb activity to the console.") { |v| options[:gdb_debug] = v }
+  opts.on("-h", "--help", "Show this help message.") { puts opts; exit }
+  opts.parse!
+end
+
+Hijack.start(ARGV.last, options)

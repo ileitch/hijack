@@ -1,9 +1,5 @@
 module Hijack
   class Console
-    def self.start(pid)
-      new(pid)
-    end
-
     def initialize(pid)
       @pid = pid
       @remote = nil

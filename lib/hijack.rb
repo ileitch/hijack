@@ -11,6 +11,15 @@ require 'hijack/payload'
 require 'hijack/workspace'
 
 module Hijack
+  def self.start(pid, options)
+    @@options = options
+    Console.new(pid)
+  end
+
+  def self.options
+    @@options
+  end
+
   def self.socket_for(pid)
     "drbunix:/#{socket_path_for(pid)}"
   end
