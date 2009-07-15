@@ -2,3 +2,4 @@
 * assigning a variable doesn't work
 * see TODO in Payload#payload
 * Improve startup experience
+* Check if attached process is in fact a ruby process

@@ -10,6 +10,10 @@ module Hijack
   class Payload
     def self.inject(pid)
       gdb = GDB.new(pid)
+      unless gdb.attached_to_ruby_process?
+        puts "\n=> #{pid} doesn't appear to be a Ruby process!"
+        exit 1
+      end
       gdb.eval(payload(pid))
       gdb.detach
     end

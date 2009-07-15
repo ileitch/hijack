@@ -9,6 +9,11 @@ module Hijack
       wait
     end
 
+    def attached_to_ruby_process?
+      # TODO: Implement me
+      true
+    end
+
     def eval(cmd)
       call("(void)rb_eval_string(#{cmd.strip.gsub(/"/, '\"').inspect})")
     end

@@ -3,6 +3,7 @@ module Hijack
     def initialize(pid)
       @pid = pid
       @remote = nil
+      check_pid
       str = "=> Hijacking..."
       $stdout.write(str)
       $stdout.flush
@@ -17,6 +18,18 @@ module Hijack
     end
 
   protected
+    def check_pid
+      begin
+        Process.kill(0, @pid.to_i)
+      rescue Errno::EPERM
+        puts "=> You do not have the correct permissions to hijack #{@pid}"
+        exit 1
+      rescue Errno::ESRCH
+        puts "=> No such process #{@pid}"
+        exit 1
+      end
+    end
+
     def signal_drb_start
       Process.kill('USR1', @pid.to_i)
       loop do
