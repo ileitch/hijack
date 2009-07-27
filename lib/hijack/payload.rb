@@ -19,7 +19,7 @@ module Hijack
           module Hijack
             module CopiedOutput
             end
-            
+
             module CopiedStdout
               def self.orig=(obj)
                 @@orig = obj
@@ -49,7 +49,7 @@ module Hijack
                 @@remote = obj
               end
 
-              
+
               def self.write(str)
                 @@remote.write('stderr', str)
                 @@orig.write(str)
@@ -63,9 +63,10 @@ module Hijack
 
             class OutputCopier
               def self.start(pid)
-                CopiedStdout.remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
+                remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
+                CopiedStdout.remote = remote
+                CopiedStderr.remote = remote
                 CopiedStdout.orig = $stdout
-                CopiedStderr.remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
                 CopiedStderr.orig = $stderr
                 $stdout = CopiedStdout
                 $stderr = CopiedStderr
