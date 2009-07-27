@@ -12,6 +12,7 @@ module Hijack
       connect
       $stdout.write("\b" * str.size)
       $stdout.flush
+      start_output_receiver
       mirror_process
       banner
       start_irb
@@ -42,6 +43,21 @@ module Hijack
       @remote = DRbObject.new(nil, Hijack.socket_for(@pid))
     end
 
+    module OutputReceiver
+      def self.write(where, str)
+        Object.const_get(where.upcase).write(str)
+      end
+
+      def self.puts(where, str)
+        Object.const_get(where.upcase).puts(str)
+      end
+    end
+
+    def start_output_receiver
+      DRb.start_service(Hijack.socket_for(Process.pid), OutputReceiver)
+      @remote.evaluate("__hijack_output_receiver_ready_#{Process.pid}")
+    end
+
     def mirror_process
       # Attempt to require all files currently loaded by the remote process so DRb can dump as many objects as possible.
       #
@@ -49,7 +65,7 @@ module Hijack
       # This is because when you require file_a.rb which first sets a constant then requires file_b.rb
       # the $" array will contain file_b.rb before file_a.rb. But if we require file_b.rb before file_a.rb
       # we'll get a missing constant error.
-      load_path, loaded_files = @remote.evaluate('[$:, $"]').result
+      load_path, loaded_files = @remote.evaluate('[$:, $"]')
       to_load = (loaded_files - $").uniq
       return if to_load.empty?
       completion_percentage = 0
@@ -93,7 +109,7 @@ module Hijack
     end
 
     def banner
-      script, ruby_version, platform, hijack_version = @remote.evaluate('[$0, RUBY_VERSION, RUBY_PLATFORM]').result
+      script, ruby_version, platform, hijack_version = @remote.evaluate('[$0, RUBY_VERSION, RUBY_PLATFORM]')
       puts "=> Hijacked #{@pid} (#{script}) (ruby #{ruby_version} [#{platform}])"
     end
   end

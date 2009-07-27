@@ -1,12 +1,4 @@
 module Hijack
-  class Evaluation
-    attr_reader :result, :output
-    def initialize(result, output)
-      @result = result
-      @output = output
-    end
-  end
-
   class Payload
     def self.inject(pid)
       gdb = GDB.new(pid)
@@ -25,6 +17,61 @@ module Hijack
 
         unless defined?(Hijack)
           module Hijack
+            module CopiedOutput
+            end
+            
+            module CopiedStdout
+              def self.orig=(obj)
+                @@orig = obj
+              end
+
+              def self.remote=(obj)
+                @@remote = obj
+              end
+
+              def self.write(str)
+                @@remote.write('stdout', str)
+                @@orig.write(str)
+              end
+
+              def self.puts(str)
+                @@remote.puts('stdout', str)
+                @@orig.puts(str)
+              end
+            end
+
+            module CopiedStderr
+              def self.orig=(obj)
+                @@orig = obj
+              end
+
+              def self.remote=(obj)
+                @@remote = obj
+              end
+
+              
+              def self.write(str)
+                @@remote.write('stderr', str)
+                @@orig.write(str)
+              end
+
+              def self.puts(str)
+                @@remote.puts('stderr', str)
+                @@orig.puts(str)
+              end
+            end
+
+            class OutputCopier
+              def self.start(pid)
+                CopiedStdout.remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
+                CopiedStdout.orig = $stdout
+                CopiedStderr.remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
+                CopiedStderr.orig = $stderr
+                $stdout = CopiedStdout
+                $stderr = CopiedStderr
+              end
+            end
+
             class Evaluator
               attr_writer :enabled
 
@@ -35,17 +82,11 @@ module Hijack
 
               def evaluate(rb)
                 return unless @enabled
-                output = StringIO.new
-                $stdout = output
-                Evaluation.new(@context.instance_eval(rb), output.string)
-              end
-            end
-
-            class Evaluation
-              attr_reader :result, :output
-              def initialize(result, output)
-                @result = result
-                @output = output
+                if rb =~ /__hijack_output_receiver_ready_([\\d]+)/
+                  OutputCopier.start($1)
+                  return
+                end
+                @context.instance_eval(rb)
               end
             end
 

@@ -3,3 +3,5 @@
 * see TODO in Payload#payload
 * Improve startup experience
 * Check if attached process is in fact a ruby process
+* Require actual remote script if possible so that if it defines any classes we can dump those too.
+* (eval):211: [BUG] object allocation during garbage collection phase

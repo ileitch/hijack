@@ -6,19 +6,16 @@ module Hijack
         super
       else
         begin
-          evaluation = remote.evaluate(statements)
+          result = remote.evaluate(statements)
         rescue DRb::DRbConnError
           puts "=> Lost connection to #{@pid}!"
           exit 1
         end
-        if evaluation.kind_of?(DRb::DRbUnknown)
+        if result.kind_of?(DRb::DRbUnknown)
           puts "=> Hijack: Can't dump an object type that does not exist locally, try inspecting it instead."
-          nil
-        else
-          $stdout.write(evaluation.output)
-          $stdout.flush
-          evaluation.result
+          return nil
         end
+        result
       end
     end
   end
