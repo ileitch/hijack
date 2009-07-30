@@ -12,9 +12,9 @@ module Hijack
       connect
       $stdout.write("\b" * str.size)
       $stdout.flush
-      start_output_receiver
       mirror_process
       banner
+      start_output_receiver
       start_irb
     end
 
