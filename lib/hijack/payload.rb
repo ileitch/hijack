@@ -28,7 +28,7 @@ module Hijack
                 class << $stdout
                   def write_with_copying(str)
                     write_without_copying(str)
-                    Hijack::OutputCopier.remote.write('stdout', str)
+                    Hijack::OutputCopier.remote.write('stdout', str) rescue nil
                   end
                   alias_method :write_without_copying, :write
                   alias_method :write, :write_with_copying
@@ -37,7 +37,7 @@ module Hijack
                 class << $stderr
                   def write_with_copying(str)
                     write_without_copying(str)
-                    Hijack::OutputCopier.remote.write('stderr', str)
+                    Hijack::OutputCopier.remote.write('stderr', str) rescue nil
                   end
                   alias_method :write_without_copying, :write
                   alias_method :write, :write_with_copying
