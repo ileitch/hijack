@@ -17,59 +17,31 @@ module Hijack
 
         unless defined?(Hijack)
           module Hijack
-            module CopiedOutput
-            end
-
-            module CopiedStdout
-              def self.orig=(obj)
-                @@orig = obj
-              end
-
-              def self.remote=(obj)
-                @@remote = obj
-              end
-
-              def self.write(str)
-                @@remote.write('stdout', str)
-                @@orig.write(str)
-              end
-
-              def self.puts(str)
-                @@remote.puts('stdout', str)
-                @@orig.puts(str)
-              end
-            end
-
-            module CopiedStderr
-              def self.orig=(obj)
-                @@orig = obj
-              end
-
-              def self.remote=(obj)
-                @@remote = obj
-              end
-
-
-              def self.write(str)
-                @@remote.write('stderr', str)
-                @@orig.write(str)
-              end
-
-              def self.puts(str)
-                @@remote.puts('stderr', str)
-                @@orig.puts(str)
-              end
-            end
-
             class OutputCopier
+              def self.remote
+                @@remote
+              end
+
               def self.start(pid)
-                remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
-                CopiedStdout.remote = remote
-                CopiedStderr.remote = remote
-                CopiedStdout.orig = $stdout
-                CopiedStderr.orig = $stderr
-                $stdout = CopiedStdout
-                $stderr = CopiedStderr
+                @@remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
+
+                class << $stdout
+                  def write_with_copying(str)
+                    write_without_copying(str)
+                    Hijack::OutputCopier.remote.write('stdout', str)
+                  end
+                  alias_method :write_without_copying, :write
+                  alias_method :write, :write_with_copying
+                end
+
+                class << $stderr
+                  def write_with_copying(str)
+                    write_without_copying(str)
+                    Hijack::OutputCopier.remote.write('stderr', str)
+                  end
+                  alias_method :write_without_copying, :write
+                  alias_method :write, :write_with_copying
+                end
               end
             end
 
