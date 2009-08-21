@@ -1,6 +1,5 @@
 * Use thread local stdout & stderr capture.
 * assigning a variable doesn't work
-* see TODO in Payload#payload
 * Improve startup experience
 * Check if attached process is in fact a ruby process
 * Require actual remote script if possible so that if it defines any classes we can dump those too.

@@ -67,7 +67,6 @@ module Hijack
       # we'll get a missing constant error.
       load_path, loaded_files = @remote.evaluate('[$:, $"]')
       to_load = (loaded_files - $").uniq
-      return if to_load.empty?
       completion_percentage = 0
       str = '=> Mirroring: '
       percent_str = ''

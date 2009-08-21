@@ -46,20 +46,19 @@ module Hijack
             end
 
             class Evaluator
-              attr_writer :enabled
-
               def initialize(context)
                 @context = context
-                @enabled = false
+                @file = __FILE__
               end
 
               def evaluate(rb)
-                return unless @enabled
                 if rb =~ /__hijack_output_receiver_ready_([\\d]+)/
                   OutputCopier.start($1)
-                  return
+                elsif rb =~ /__hijack_get_remote_file_name/
+                  @file
+                else
+                  @context.instance_eval(rb)
                 end
-                @context.instance_eval(rb)
               end
             end
 
@@ -68,8 +67,6 @@ module Hijack
               evaluator = Hijack::Evaluator.new(context)
               @service = DRb.start_service('#{Hijack.socket_for(pid)}', evaluator)
               File.chmod(0600, '#{Hijack.socket_path_for(pid)}')
-              # TODO: This could just as easily be called by the client...
-              evaluator.enabled = true
             end
           end
         end

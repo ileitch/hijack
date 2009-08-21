@@ -12,7 +12,7 @@ module Hijack
           exit 1
         end
         if result.kind_of?(DRb::DRbUnknown)
-          puts "=> Hijack: Can't dump an object type that does not exist locally, try inspecting it instead."
+          puts "=> Hijack: Unable to dump unknown object type '#{result.name}', try inspecting it instead."
           return nil
         end
         result
