@@ -4,11 +4,17 @@ $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'hijack'
 
 options = {}
+usage = 'Usage: hijack [options] <PID>'
 ARGV.clone.options do |opts|
-  opts.banner = 'Usage: hijack [options] <PID>'
+  opts.banner = usage
   opts.on("--gdb-debug", "Print gdb activity to the console.") { |v| options[:gdb_debug] = v }
   opts.on("-h", "--help", "Show this help message.") { puts opts; exit }
   opts.parse!
+end
+
+if ARGV.last.nil?
+  puts usage
+  exit 1
 end
 
 Hijack.start(ARGV.last, options)
