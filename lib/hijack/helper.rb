@@ -6,8 +6,7 @@ module Hijack
       end
 
       def find_helper(statements)
-        helpers.include?(statements.strip)
-        statements.strip
+        helpers.include?(statements.strip) ? statements.strip : nil
       end
 
       def helpers_like(str)
