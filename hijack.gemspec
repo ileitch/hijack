@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'hijack'
-  s.version = '0.1.3'
+  s.version = '0.1.4'
   s.platform = Gem::Platform::RUBY
   s.has_rdoc = true
   s.extra_rdoc_files = ['README.rdoc', 'TODO']
@@ -14,5 +14,6 @@ Gem::Specification.new do |s|
   s.executables  = %w( hijack )
 
   s.require_path = 'lib'
-  s.files = %w(README.rdoc Rakefile TODO) + Dir.glob("{lib,bin}/**/*")
+  s.files = ['README.rdoc' , 'Rakefile', 'TODO', 'lib/hijack', 'lib/hijack.rb', 'lib/hijack/console.rb', 'lib/hijack/gdb.rb', 'lib/hijack/helper.rb',
+    'lib/hijack/payload.rb', 'lib/hijack/workspace.rb', 'examples/rails_dispatcher.rb', 'bin/hijack']
 end
