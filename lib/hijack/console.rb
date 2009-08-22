@@ -44,12 +44,22 @@ module Hijack
     end
 
     module OutputReceiver
+      @@mute = false
+
+      def self.mute
+        @@mute = true
+      end
+
+      def self.unmute
+        @@mute = false
+      end
+
       def self.write(where, str)
-        Object.const_get(where.upcase).write(str)
+        Object.const_get(where.upcase).write(str) unless @@mute
       end
 
       def self.puts(where, str)
-        Object.const_get(where.upcase).puts(str)
+        Object.const_get(where.upcase).puts(str) unless @@mute
       end
     end
 

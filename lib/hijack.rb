@@ -4,9 +4,11 @@ require 'drb'
 require 'drb/unix'
 require 'rbconfig'
 require 'irb'
+require 'irb/completion'
 require 'hijack/console'
 require 'hijack/gdb'
 require 'hijack/payload'
+require 'hijack/helper'
 require 'hijack/workspace'
 
 module Hijack
