@@ -1,9 +1,9 @@
 Gem::Specification.new do |s|
   s.name = 'hijack'
-  s.version = '0.1.4'
+  s.version = '0.1.5'
   s.platform = Gem::Platform::RUBY
   s.has_rdoc = true
-  s.extra_rdoc_files = ['README.rdoc', 'TODO']
+  s.extra_rdoc_files = ['README.rdoc']
   s.summary = 'Provides an irb session to an existing ruby process.'
   s.description = s.summary
   s.author = 'Ian Leitch'

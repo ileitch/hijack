@@ -33,7 +33,7 @@ module Hijack
     end
 
     def signal_drb_start
-      Process.kill('USR1', @pid.to_i)
+      Process.kill('USR2', @pid.to_i)
       loop do
         break if File.exists?(Hijack.socket_path_for(@pid))
         sleep 0.1

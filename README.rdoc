@@ -1,26 +1,128 @@
 = Hijack: Provides an irb session to an existing ruby process.
 
+== Intro
+
+Hijack allows you to connect to any ruby process and execute code as if it were a normal irb session. Hijack does not require your target process to require any hijacking code, hijack is able to connect to any ruby process. It achieves this by using gdb to inject a payload into the process which starts up a DRb server, hijack then detaches gdb and reconnects via DRb. Please note that gdb will halt your target process while it is attached, though the injection process is very quick and your process should only be halted for a few milliseconds.
+
+Hijack uses DRb over a unix socket file, so you need to be on the same machine as the process you want to hijack. This is by design for security reasons. You also need to run the hijack client as the same user as the remote process.
+
 == WARNING
 
 Hijack is new code, I'd think twice about trying it out on your critical production systems. I'd love to get some feedback though so if you have any staging systems to try it out on then please do... ;)
 
-== Intro
-
-Hijack allows you to connect to any ruby process and execute code as if it were a normal Irb session. Hijack does not require your target process to require any hijack code, Hijack is able to connect to any ruby process. It achieves this by using gdb to inject a payload into the process which starts up a DRb server, Hijack then detaches gdb and reconnects via DRb. Please note that gdb will halt your target process while it is attached, though the injection process is very quick and your process should only be halted for a few milliseconds.
-
-Hijack uses DRb over a unix socket file, so you need to be on the same machine as the process you want to hijack. This is by design for security reasons. You also need to run the hijack client as the same user as the remote process.
-
 == Using Hijack
 
-	$ ruby hijack 16451
-	=> Hijacking...
-	=> Mirroring: 100%
-	=> Hijacked 16451 (my_script.rb) (ruby 1.8.7 [i686-darwin9])
-	>>
+  $ hijack 16451
+  => Hijacked 16451 (my_script.rb) (ruby 1.8.7 [i686-darwin9])
+  >>
+
+== Using ruby-debug
+
+Hijack can be used a means to start ruby-debug in your target process, for example:
+
+  $ hijack 61378
+  => Hijacked 61378 (/opt/local/bin/thin) (ruby 1.8.7 [i686-darwin9])
+  >> hijack_debug_mode
+  => true
+
+We've enabled debug mode, but we still need to insert a breakpoint:
+
+  >> ActionController::Dispatcher.class_eval do
+  >>   class << self
+  >>     def dispatch_with_debugger(cgi, session_options, output)
+  >>       debugger
+  >>       dispatch_without_debugger(cgi, session_options, output)
+  >>     end
+  >>     alias_method :dispatch_without_debugger, :dispatch
+  >>     alias_method :dispatch, :dispatch_with_debugger
+  >>   end
+  >> end
+
+Now tell hijack that we can start debugging:
+
+  >> hijack_debug_start
+  Connected.
+
+Point your browser at http://0.0.0.0:3000 to trigger the breakpoint and ruby-debug's console will appear:
+
+  >> hijack_debug_start
+  Connected.
+  (eval):5
+  (rdb:4) step
+  /Users/ian/Projects/zioko/vendor/rails/actionpack/lib/action_controller/dispatcher.rb:28 new(output).dispatch_cgi(cgi, session_options)
+  (rdb:4) backtrace
+  --> #0 /Users/ian/Projects/zioko/vendor/rails/actionpack/lib/action_controller/dispatcher.rb:28 in 'dispatch_without_debugger'
+      #1 (eval):5 in 'dispatch'
+      #2 /opt/local/lib/ruby/gems/1.8/gems/thin-1.2.2/lib/rack/adapter/rails.rb:81 in 'call'
+      #3 /opt/local/lib/ruby/gems/1.8/gems/thin-1.2.2/lib/rack/adapter/rails.rb:69 in 'call'
+      #4 /opt/local/lib/ruby/gems/1.8/gems/thin-1.2.2/lib/thin/connection.rb:76 in 'pre_process'
+      #5 /opt/local/lib/ruby/gems/1.8/gems/thin-1.2.2/lib/thin/connection.rb:74 in 'pre_process'
+      #6 /opt/local/lib/ruby/gems/1.8/gems/thin-1.2.2/lib/thin/connection.rb:57 in 'process'
+      #7 /opt/local/lib/ruby/gems/1.8/gems/thin-1.2.2/lib/thin/connection.rb:42 in 'receive_data'
+  (rdb:4)
+
+One caveat is that ruby-debug's 'irb' command will not work because the debug connection is remote, you also can't use hijack's irb console whilst debugging. A future version of hijack will hopefully allow you to switch between the two.
+
+== Monkey Patching
+
+Just as in a normal irb session, you can redefine the code running in your target process.
+
+This example redefines ActionController's dispatcher to print basic request activity (the example can be found in examples/rails_dispatcher.rb).
+
+Start up a Thin web server:
+
+  $ thin start
+  >> Using rails adapter
+  >> Thin web server (v1.2.2 codename I Find Your Lack of Sauce Disturbing)
+  >> Maximum connections set to 1024
+  >> Listening on 0.0.0.0:3000, CTRL+C to stop
+
+In another console hijack the Thin process:
+
+  $ ps | grep thin
+  61160 ttys001    0:01.43 /opt/local/bin/ruby /opt/local/bin/thin start
+
+  $ hijack 61160
+  => Hijacked 61160 (/opt/local/bin/thin) (ruby 1.8.7 [i686-darwin9])
+  >> ActionController::Dispatcher.class_eval do
+  ?>   class << self
+  >>     def dispatch_with_spying(cgi, session_options, output)
+  >>       env = cgi.__send__(:env_table)
+  >>       puts "#{Time.now.strftime('%Y/%m/%d %H:%M:%S')} - #{env['REMOTE_ADDR']} - #{env['REQUEST_URI']}"
+  >>       dispatch_without_spying(cgi, session_options, output)
+  >>     end
+  >>     alias_method :dispatch_without_spying, :dispatch
+  >>     alias_method :dispatch, :dispatch_with_spying
+  >>   end
+  >> end
+
+Point your browser to http://0.0.0.0:3000.
+
+Back in hijack you'll see your browsing activity:
+
+  2009/08/22 14:24:48 - 127.0.0.1 - /
+  2009/08/22 14:24:53 - 127.0.0.1 - /login
+  2009/08/22 14:24:54 - 127.0.0.1 - /signup
+
+Instead of pasting your code into hijack, you can pass hijack the -e option at startup to execute from a file:
+
+  $ hijack -e examples/rails_dispatcher.rb 61565
+  => Hijacked 61565 (/opt/local/bin/thin) (ruby 1.8.7 [i686-darwin9])
+  => Executing examples/rails_dispatcher.rb... done!
+  >> 2009/08/22 14:46:36 - 127.0.0.1 - /
+
+== Process Output
+
+By default hijack will forward your process output to the hijack client. This can get a little messy if your trying to type and command at the same time as the target process writes to STDOUT/STDERR. You can mute and unmute the process with:
+
+  >> hijack_mute
+  >> true
+  >> hijack_unmute
+  >> true
 
 == Process Mirroring
 
-DRb cannot dump objects to the Hijack client for types that are not loaded in the client process. E.g if the remote process had required ActiveRecord and you tried to dump ActiveRecord::Base back to the client, DRb would instead return a DRb::Unknown object as ActiveRecord
-isn't loaded in the Hijack client.
+DRb cannot dump objects to the hijack client for types that are not loaded in the client process. E.g if the remote process had required ActiveRecord and you tried to dump ActiveRecord::Base back to the client, DRb would instead return a DRb::Unknown object as ActiveRecord
+isn't loaded in the hijack client.
 
-To work around this, when Hijack connects to a remote process it will inspect all the files required by the process and also attempt to require them itself. This may not work for all object types however so you may still get a warning when an object cannot be dumped.
+To work around this, when hijack connects to a remote process it will inspect all the files required by the process and also attempt to require them itself. This may not work for all object types however so you may still get a warning when an object cannot be dumped.

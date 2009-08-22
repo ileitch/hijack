@@ -71,7 +71,7 @@ module Hijack
           end
         end
         __hijack_context = self
-        Signal.trap('USR1') { Hijack.start(__hijack_context) }
+        Signal.trap('USR2') { Hijack.start(__hijack_context) }
       EOS
     end
   end
