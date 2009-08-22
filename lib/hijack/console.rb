@@ -14,6 +14,7 @@ module Hijack
       $stdout.flush
       mirror_process
       banner
+      execute_file
       start_output_receiver
       start_irb
     end
@@ -120,6 +121,19 @@ module Hijack
     def banner
       script, ruby_version, platform, hijack_version = @remote.evaluate('[$0, RUBY_VERSION, RUBY_PLATFORM]')
       puts "=> Hijacked #{@pid} (#{script}) (ruby #{ruby_version} [#{platform}])"
+    end
+
+    def execute_file
+      if Hijack.options[:execute]
+        if File.exists?(Hijack.options[:execute])
+          $stdout.write("=> Executing #{Hijack.options[:execute]}... ")
+          $stdout.flush
+          @remote.evaluate(File.read(Hijack.options[:execute]))
+          puts "done!"
+        else
+          puts "=> Can't find #{Hijack.options[:execute]} to execute!"
+        end
+      end
     end
   end
 end

@@ -10,4 +10,3 @@ ActionController::Dispatcher.class_eval do
     alias_method :dispatch, :dispatch_with_spying
   end
 end
-nil
