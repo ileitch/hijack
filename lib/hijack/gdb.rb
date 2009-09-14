@@ -15,20 +15,43 @@ module Hijack
     end
 
     def eval(cmd)
+      set_trap_pending
+      set_breakpoint
+      continue
+      clear_breakpoint
       call("(void)rb_eval_string(#{cmd.strip.gsub(/"/, '\"').inspect})")
     end
 
     def detach
-      @gdb.puts('detach')
-      wait
-      @gdb.puts('quit')
+      exec('detach')
+      exec('quit')
       @gdb.close
     end
 
   protected
+    def set_trap_pending
+      exec("set variable (int)rb_trap_pending=1")
+    end
+
+    def set_breakpoint
+      exec("break rb_trap_exec")
+    end
+
+    def clear_breakpoint
+      exec("clear rb_trap_exec")
+    end
+
+    def continue
+      exec('continue')
+    end
+
     def call(cmd)
-      puts "(gdb) call #{cmd}" if @verbose
-      @gdb.puts("call #{cmd}")
+      exec("call #{cmd}")
+    end
+
+    def exec(str)
+      puts("(gdb) #{str}")  if @verbose
+      @gdb.puts(str)
       wait
     end
 

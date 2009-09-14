@@ -8,7 +8,7 @@ Hijack uses DRb over a unix socket file, so you need to be on the same machine a
 
 == WARNING
 
-Hijack is new code, I'd think twice about trying it out on your critical production systems. I'd love to get some feedback though so if you have any staging systems to try it out on then please do... ;)
+Hijack is new code, I'd think twice about trying it out on your critical production systems. I'd love to get some feedback though so if you have any development or staging systems to try it out on then please do!
 
 == Using Hijack
 
@@ -113,12 +113,12 @@ Instead of pasting your code into hijack, you can pass hijack the -e option at s
 
 == Process Output
 
-By default hijack will forward your process output to the hijack client. This can get a little messy if your trying to type and command at the same time as the target process writes to STDOUT/STDERR. You can mute and unmute the process with:
+By default hijack will forward your process output to the hijack client. This can get a little messy if your trying to write code at the same time as the target process writes to STDOUT/STDERR. You can mute and unmute the process with:
 
   >> hijack_mute
-  >> true
+  => true
   >> hijack_unmute
-  >> true
+  => true
 
 == Process Mirroring
 
