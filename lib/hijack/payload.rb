@@ -11,7 +11,7 @@ module Hijack
     end
 
     def self.payload(pid)
-      <<-EOS
+      <<-RUBY
         require 'stringio'
         require 'drb'
 
@@ -19,16 +19,32 @@ module Hijack
           module Hijack
             class OutputCopier
               def self.remote
-                @@remote
+                @remote
+              end
+
+              def self.stop
+                @remote = nil
+                [$stdout, $stderr].each do |io|
+                  if io.respond_to?(:write_with_copying)
+                    class << io
+                      alias_method :write, :write_without_copying
+                      remove_method :write_with_copying
+                    end
+                  end
+                end
               end
 
               def self.start(pid)
-                @@remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
+                @remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
 
                 class << $stdout
                   def write_with_copying(str)
                     write_without_copying(str)
-                    Hijack::OutputCopier.remote.write('stdout', str) rescue nil
+                    begin
+                      Hijack::OutputCopier.remote.write('stdout', str)
+                    rescue Exception
+                      Hijack.stop
+                    end
                   end
                   alias_method :write_without_copying, :write
                   alias_method :write, :write_with_copying
@@ -37,7 +53,11 @@ module Hijack
                 class << $stderr
                   def write_with_copying(str)
                     write_without_copying(str)
-                    Hijack::OutputCopier.remote.write('stderr', str) rescue nil
+                    begin
+                      Hijack::OutputCopier.remote.write('stderr', str)
+                    rescue Exception
+                      Hijack.stop
+                    end
                   end
                   alias_method :write_without_copying, :write
                   alias_method :write, :write_with_copying
@@ -56,6 +76,8 @@ module Hijack
                   OutputCopier.start($1)
                 elsif rb =~ /__hijack_get_remote_file_name/
                   @file
+                elsif rb =~ /__hijack_exit/
+                  Hijack.stop
                 else
                   @context.instance_eval(rb)
                 end
@@ -68,11 +90,20 @@ module Hijack
               @service = DRb.start_service('#{Hijack.socket_for(pid)}', evaluator)
               File.chmod(0600, '#{Hijack.socket_path_for(pid)}')
             end
+
+            def self.stop
+              begin
+                OutputCopier.stop
+                @service.stop_service
+                @service = nil
+              rescue Exception
+              end
+            end
           end
         end
         __hijack_context = self
         Signal.trap('USR2') { Hijack.start(__hijack_context) }
-      EOS
+      RUBY
     end
   end
 end

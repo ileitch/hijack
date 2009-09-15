@@ -12,7 +12,10 @@ module Hijack
   class Workspace < IRB::WorkSpace
     attr_accessor :remote, :pid
     def evaluate(context, statements, file = __FILE__, line = __LINE__)
-      if statements =~ /(IRB\.|exit)/
+      if statements =~ /IRB\./
+        super
+      elsif statements.strip =~ /^exit/
+        remote.evaluate('__hijack_exit') rescue nil
         super
       elsif helper = Hijack::Helper.find_helper(statements)
         Hijack::Helper.send(helper, remote)

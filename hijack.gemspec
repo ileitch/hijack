@@ -1,19 +1,71 @@
-Gem::Specification.new do |s|
-  s.name = 'hijack'
-  s.version = '0.1.6'
-  s.platform = Gem::Platform::RUBY
-  s.has_rdoc = true
-  s.extra_rdoc_files = ['README.rdoc']
-  s.summary = 'Provides an irb session to an existing ruby process.'
-  s.description = s.summary
-  s.author = 'Ian Leitch'
-  s.email = 'ian.leitch@systino.net'
-  s.homepage = 'http://github.com/ileitch/hijack'
+--- !ruby/object:Gem::Specification 
+name: hijack
+version: !ruby/object:Gem::Version 
+  version: 0.1.7
+platform: ruby
+authors: 
+- Ian Leitch
+autorequire: 
+bindir: bin
+cert_chain: []
 
-  s.bindir       = "bin"
-  s.executables  = %w( hijack )
+date: 2009-09-14 00:00:00 -04:00
+default_executable: 
+dependencies: []
 
-  s.require_path = 'lib'
-  s.files = ['README.rdoc' , 'Rakefile', 'TODO', 'lib/hijack', 'lib/hijack.rb', 'lib/hijack/console.rb', 'lib/hijack/gdb.rb', 'lib/hijack/helper.rb',
-    'lib/hijack/payload.rb', 'lib/hijack/workspace.rb', 'examples/rails_dispatcher.rb', 'bin/hijack', 'test/app.rb', 'test/gc.rb', 'test/test.rb']
-end
+description: Provides an irb session to an existing ruby process.
+email: ian.leitch@systino.net
+executables: 
+- hijack
+extensions: []
+
+extra_rdoc_files: []
+
+files: 
+- COPYING
+- TODO
+- README.rdoc
+- Rakefile
+- lib/hijack
+- lib/hijack/console.rb
+- lib/hijack/gdb.rb
+- lib/hijack/helper.rb
+- lib/hijack/payload.rb
+- lib/hijack/workspace.rb
+- lib/hijack.rb
+- test/app.rb
+- test/gc.rb
+- test/test.rb
+- tasks/gem.rake
+- bin/hijack
+- examples/rails_dispatcher.rb
+has_rdoc: true
+homepage: http://github.com/ileitch/hijack
+licenses: []
+
+post_install_message: 
+rdoc_options: []
+
+require_paths: 
+- lib
+required_ruby_version: !ruby/object:Gem::Requirement 
+  requirements: 
+  - - ">="
+    - !ruby/object:Gem::Version 
+      version: "0"
+  version: 
+required_rubygems_version: !ruby/object:Gem::Requirement 
+  requirements: 
+  - - ">="
+    - !ruby/object:Gem::Version 
+      version: "0"
+  version: 
+requirements: []
+
+rubyforge_project: 
+rubygems_version: 1.3.4
+signing_key: 
+specification_version: 3
+summary: Provides an irb session to an existing ruby process.
+test_files: []
+

@@ -1,9 +1,4 @@
-require 'rubygems'
-require 'rake/gempackagetask'
+require 'rake'
+require 'rake/clean'
 
-spec = eval(File.read('hijack.gemspec'))
-
-Rake::GemPackageTask.new(spec) do |pkg|
-  pkg.gem_spec = spec
-end
-
+Dir['tasks/**/*.rake'].each { |rake| load rake }
