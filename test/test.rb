@@ -1,5 +1,8 @@
 #!/usr/bin/ruby
 
+class SomeClass
+end
+
 def do_shit(i)
   puts i
 end

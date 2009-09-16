@@ -15,7 +15,7 @@ module Hijack
       mirror_process
       banner
       execute_file
-      start_output_receiver
+      OutputReceiver.start(@remote) unless Hijack.options[:mute]
       start_irb
     end
 
@@ -36,7 +36,7 @@ module Hijack
       Process.kill('USR2', @pid.to_i)
       loop do
         break if File.exists?(Hijack.socket_path_for(@pid))
-        sleep 0.1
+        sleep 0.01
       end
     end
 
@@ -45,28 +45,30 @@ module Hijack
     end
 
     module OutputReceiver
-      @@mute = false
+      class << self
+        def mute
+          @mute = true
+        end
 
-      def self.mute
-        @@mute = true
+        def unmute(remote)
+          start(remote) unless @started
+          @mute = false
+        end
+
+        def write(where, str)
+          Object.const_get(where.upcase).write(str) unless @mute
+        end
+
+        def puts(where, str)
+          Object.const_get(where.upcase).puts(str) unless @mute
+        end
+
+        def start(remote)
+          DRb.start_service(Hijack.socket_for(Process.pid), self)
+          remote.evaluate("__hijack_output_receiver_ready_#{Process.pid}")
+          @started = true
+        end
       end
-
-      def self.unmute
-        @@mute = false
-      end
-
-      def self.write(where, str)
-        Object.const_get(where.upcase).write(str) unless @@mute
-      end
-
-      def self.puts(where, str)
-        Object.const_get(where.upcase).puts(str) unless @@mute
-      end
-    end
-
-    def start_output_receiver
-      DRb.start_service(Hijack.socket_for(Process.pid), OutputReceiver)
-      @remote.evaluate("__hijack_output_receiver_ready_#{Process.pid}")
     end
 
     def mirror_process

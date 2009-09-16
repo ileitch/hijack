@@ -11,7 +11,8 @@ new_argv.delete(pid)
 
 new_argv.options do |opts|
   opts.banner = usage
-  opts.on("--gdb-debug", "Print gdb activity to the console.") { |v| options[:gdb_debug] = v }
+  opts.on("--gdb-debug", "Print gdb activity to the console.") { |v| options[:gdb_debug] = true }
+  opts.on("--mute", "Ignore stdout/stderr writes from the remote process.") { |v| options[:mute] = true }
   opts.on("-e", "--execute=FILE", String, "Execute the specified file in the remote process and then disconnect.") { |v| options[:execute] = v }
   opts.on("-h", "--help", "Show this help message.") { puts opts; exit }
   opts.parse!

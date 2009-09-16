@@ -20,7 +20,7 @@ module Hijack
       end
 
       def hijack_unmute(remote)
-        Hijack::Console::OutputReceiver.unmute
+        Hijack::Console::OutputReceiver.unmute(remote)
         true
       end
 
