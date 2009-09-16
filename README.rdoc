@@ -120,6 +120,8 @@ By default hijack will forward your process output to the hijack client. This ca
   >> hijack_unmute
   => true
 
+For ease of use, hijack helper methods are discoverable with tab completion. hi<tab><tab> will give you a list of available helpers.
+
 == Process Mirroring
 
 DRb cannot dump objects to the hijack client for types that are not loaded in the client process. E.g if the remote process had required ActiveRecord and you tried to dump ActiveRecord::Base back to the client, DRb would instead return a DRb::Unknown object as ActiveRecord

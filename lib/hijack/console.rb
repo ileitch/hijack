@@ -130,6 +130,7 @@ module Hijack
           $stdout.flush
           @remote.evaluate(File.read(Hijack.options[:execute]))
           puts "done!"
+          exit
         else
           puts "=> Can't find #{Hijack.options[:execute]} to execute!"
         end
