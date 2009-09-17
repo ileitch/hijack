@@ -9,8 +9,16 @@ module Hijack
       wait
     end
 
+    def backtrace
+      @backtrace ||= exec('bt').reverse
+    end
+
     def attached_to_ruby_process?
-      exec('bt').any? {|line| line =~ /ruby_run/}
+      backtrace.any? {|line| line =~ /ruby_run/}
+    end
+
+    def main_thread_blocked_by_join?
+      backtrace.any? {|line| line =~ /rb_thread_join/}
     end
 
     def eval(cmd)

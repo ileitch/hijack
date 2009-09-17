@@ -6,6 +6,11 @@ module Hijack
         puts "\n=> #{pid} doesn't appear to be a Ruby process!"
         exit 1
       end
+      if gdb.main_thread_blocked_by_join?
+        puts "\n=> Unable to hijack #{pid} because the main thread is blocked waiting for another thread to join."
+        puts "=> Check that you are using the most recent version of hijack, a newer version may have solved this shortcoming."
+        exit 1
+      end
       gdb.eval(payload(pid))
       gdb.detach
     end
