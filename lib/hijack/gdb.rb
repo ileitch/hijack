@@ -10,8 +10,7 @@ module Hijack
     end
 
     def attached_to_ruby_process?
-      # TODO: Implement me
-      true
+      exec('bt').any? {|line| line =~ /ruby_run/}
     end
 
     def eval(cmd)
@@ -70,6 +69,7 @@ module Hijack
         end
       end
       puts lines.map { |l| "> #{l}" } if @verbose
+      lines
     end
   end
 end
