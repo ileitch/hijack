@@ -6,10 +6,6 @@ Hijack allows you to connect to any ruby process and execute code as if it were 
 
 Hijack uses DRb over a unix socket file, so you need to be on the same machine as the process you want to hijack. This is by design for security reasons. You also need to run the hijack client as the same user as the remote process.
 
-== WARNING
-
-Hijack is new code, I'd think twice about trying it out on your critical production systems. I'd love to get some feedback though so if you have any development or staging systems to try it out on then please do!
-
 == Using Hijack
 
   $ hijack 16451
@@ -104,12 +100,7 @@ Back in hijack you'll see your browsing activity:
   2009/08/22 14:24:53 - 127.0.0.1 - /login
   2009/08/22 14:24:54 - 127.0.0.1 - /signup
 
-Instead of pasting your code into hijack, you can pass hijack the -e option at startup to execute from a file:
-
-  $ hijack -e examples/rails_dispatcher.rb 61565
-  => Hijacked 61565 (/opt/local/bin/thin) (ruby 1.8.7 [i686-darwin9])
-  => Executing examples/rails_dispatcher.rb... done!
-  >> 2009/08/22 14:46:36 - 127.0.0.1 - /
+Instead of pasting your code into hijack, you can pass hijack the -e option execute a local file on the target process.
 
 == Process Output
 

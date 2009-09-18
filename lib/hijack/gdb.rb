@@ -9,10 +9,6 @@ module Hijack
       wait
     end
 
-    def backtrace
-      @backtrace ||= exec('bt').reverse
-    end
-
     def attached_to_ruby_process?
       backtrace.any? {|line| line =~ /ruby_run/}
     end
@@ -36,6 +32,10 @@ module Hijack
     end
 
   protected
+    def backtrace
+      @backtrace ||= exec('bt').reverse
+    end
+
     def set_trap_pending
       exec("set variable (int)rb_trap_pending=1")
     end
@@ -57,7 +57,7 @@ module Hijack
     end
 
     def exec(str)
-      puts("(gdb) #{str}")  if @verbose
+      puts("(gdb) #{str}") if @verbose
       @gdb.puts(str)
       wait
     end

@@ -1,7 +1,7 @@
 require 'rake/gempackagetask'
 require 'yaml'
 
-HIJACK_VERSION = '0.1.7'
+HIJACK_VERSION = '0.1.8'
 
 task :clean => :clobber_package
 

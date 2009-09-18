@@ -1,7 +1,7 @@
 --- !ruby/object:Gem::Specification 
 name: hijack
 version: !ruby/object:Gem::Version 
-  version: 0.1.7
+  version: 0.1.8
 platform: ruby
 authors: 
 - Ian Leitch
@@ -9,7 +9,7 @@ autorequire:
 bindir: bin
 cert_chain: []
 
-date: 2009-09-14 00:00:00 -04:00
+date: 2009-09-17 00:00:00 -04:00
 default_executable: 
 dependencies: []
 
