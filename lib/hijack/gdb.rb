@@ -31,10 +31,12 @@ module Hijack
     end
 
     def detach
+      return unless @gdb
       exec('detach')
       exec('quit')
       @backtrace = nil
       @gdb.close
+      @gdb = nil
     end
 
   protected

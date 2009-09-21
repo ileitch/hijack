@@ -1,9 +1,15 @@
 module Hijack
   class Payload
     def self.inject(pid)
+      gdb = nil
+      trap('SIGINT') do
+        puts
+        @received_sigint = true
+      end
       gdb = GDB.new(pid)
       gdb.eval(payload(pid))
       gdb.detach
+      exit if @received_sigint
     end
 
     def self.payload(pid)
