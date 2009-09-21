@@ -2,17 +2,6 @@ module Hijack
   class Payload
     def self.inject(pid)
       gdb = GDB.new(pid)
-      unless gdb.attached_to_ruby_process?
-        puts "\n=> #{pid} doesn't appear to be a Ruby process!"
-        gdb.detach
-        exit 1
-      end
-      if gdb.main_thread_blocked_by_join?
-        puts "\n=> Unable to hijack #{pid} because the main thread is blocked waiting for another thread to join."
-        puts "=> Check that you are using the most recent version of hijack, a newer version may have solved this shortcoming."
-        gdb.detach
-        exit 1
-      end
       gdb.eval(payload(pid))
       gdb.detach
     end

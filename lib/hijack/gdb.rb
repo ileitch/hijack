@@ -3,22 +3,27 @@
 module Hijack
   class GDB
     def initialize(pid)
+      @pid = pid
       @verbose = Hijack.options[:gdb_debug]
-      exec_path = File.join(Config::CONFIG['bindir'], Config::CONFIG['RUBY_INSTALL_NAME'] + Config::CONFIG['EXEEXT'])
-      @gdb = IO.popen("gdb -q #{exec_path} #{pid} 2>&1", 'r+')
-      wait
-      set_trap_pending
-      set_breakpoint
-      continue
-      clear_breakpoint
+      @exec_path = File.join(Config::CONFIG['bindir'], Config::CONFIG['RUBY_INSTALL_NAME'] + Config::CONFIG['EXEEXT'])
+      attach
     end
 
-    def attached_to_ruby_process?
-      backtrace.any? {|line| line =~ /ruby_run/}
+    def ensure_attached_to_ruby_process
+      unless backtrace.any? {|line| line =~ /rb_/}
+        puts "\n=> #{@pid} doesn't appear to be a Ruby process!"
+        detach
+        exit 1
+      end
     end
 
-    def main_thread_blocked_by_join?
-      backtrace.any? {|line| line =~ /rb_thread_join/}
+    def ensure_main_thread_not_blocked_by_join
+      if backtrace.any? {|line| line =~ /rb_thread_join/}
+        puts "\n=> Unable to hijack #{@pid} because the main thread is blocked waiting for another thread to join."
+        puts "=> Check that you are using the most recent version of hijack, a newer version may have solved this shortcoming."
+        detach
+        exit 1
+      end
     end
 
     def eval(cmd)
@@ -28,10 +33,31 @@ module Hijack
     def detach
       exec('detach')
       exec('quit')
+      @backtrace = nil
       @gdb.close
     end
 
   protected
+    def attach
+      loop do
+        @gdb = IO.popen("gdb -q #{@exec_path} #{@pid} 2>&1", 'r+')
+        wait
+        if backtrace.first =~ /Previous frame inner to this frame/
+          detach
+          sleep 0.1
+        else
+          break
+        end
+      end
+
+      ensure_attached_to_ruby_process
+      ensure_main_thread_not_blocked_by_join
+      set_trap_pending
+      set_breakpoint
+      continue
+      clear_breakpoint
+    end
+
     def backtrace
       @backtrace ||= exec('bt').reverse
     end
