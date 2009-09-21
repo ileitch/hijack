@@ -108,8 +108,7 @@ module Hijack
             end
           end
         end
-        __hijack_context = self
-        Signal.trap('USR2') { Hijack.start(__hijack_context) }
+        Hijack.start(self)
       RUBY
     end
   end

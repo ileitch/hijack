@@ -8,7 +8,6 @@ module Hijack
       $stdout.write(str)
       $stdout.flush
       Payload.inject(@pid)
-      signal_drb_start
       connect
       $stdout.write("\b" * str.size)
       $stdout.flush
@@ -32,15 +31,11 @@ module Hijack
       end
     end
 
-    def signal_drb_start
-      Process.kill('USR2', @pid.to_i)
+    def connect
       loop do
         break if File.exists?(Hijack.socket_path_for(@pid))
         sleep 0.01
       end
-    end
-
-    def connect
       @remote = DRbObject.new(nil, Hijack.socket_for(@pid))
     end
 

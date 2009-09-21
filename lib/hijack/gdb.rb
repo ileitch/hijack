@@ -7,6 +7,10 @@ module Hijack
       exec_path = File.join(Config::CONFIG['bindir'], Config::CONFIG['RUBY_INSTALL_NAME'] + Config::CONFIG['EXEEXT'])
       @gdb = IO.popen("gdb -q #{exec_path} #{pid} 2>&1", 'r+')
       wait
+      set_trap_pending
+      set_breakpoint
+      continue
+      clear_breakpoint
     end
 
     def attached_to_ruby_process?
@@ -18,10 +22,6 @@ module Hijack
     end
 
     def eval(cmd)
-      set_trap_pending
-      set_breakpoint
-      continue
-      clear_breakpoint
       call("(void)rb_eval_string(#{cmd.strip.gsub(/"/, '\"').inspect})")
     end
 
