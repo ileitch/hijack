@@ -1,5 +1,2 @@
-* Use thread local stdout & stderr capture.
-* assigning a variable doesn't work
 * Improve startup experience
-* Require actual remote script if possible so that if it defines any classes we can dump those too.
 * Add a hijack_exec helper to execute a local .rb on the target
