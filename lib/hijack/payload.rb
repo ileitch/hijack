@@ -17,7 +17,9 @@ module Hijack
         require 'stringio'
         require 'drb'
 
-        unless defined?(Hijack)
+        debug = #{Hijack.options[:debug] || false}
+        if debug || !defined?(Hijack)
+          puts 'Hijack: Debugging enabled' if debug
           module Hijack
             class OutputCopier
               def self.remote
@@ -38,13 +40,15 @@ module Hijack
 
               def self.start(pid)
                 @remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
+                p @remote if Hijack.debug?
 
                 class << $stdout
                   def write_with_copying(str)
                     write_without_copying(str)
                     begin
                       Hijack::OutputCopier.remote.write('stdout', str)
-                    rescue Exception
+                    rescue Exception => e
+                      write_without_copying(e.message) if Hijack.debug?
                       Hijack.stop
                     end
                   end
@@ -57,7 +61,8 @@ module Hijack
                     write_without_copying(str)
                     begin
                       Hijack::OutputCopier.remote.write('stderr', str)
-                    rescue Exception
+                    rescue Exception => e
+                      write_without_copying(e.message) if Hijack.debug?
                       Hijack.stop
                     end
                   end
@@ -86,8 +91,13 @@ module Hijack
               end
             end
 
-            def self.start(context)
+            def self.debug?
+              @debug
+            end
+
+            def self.start(context, debug)
               return if @service && @service.alive?
+              @debug = debug
               evaluator = Hijack::Evaluator.new(context)
               @service = DRb.start_service('#{Hijack.socket_for(pid)}', evaluator)
               File.chmod(0600, '#{Hijack.socket_path_for(pid)}')
@@ -103,7 +113,7 @@ module Hijack
             end
           end
         end
-        Hijack.start(self)
+        Hijack.start(self, #{Hijack.options[:debug] || false})
       RUBY
     end
   end

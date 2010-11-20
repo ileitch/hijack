@@ -12,7 +12,7 @@ p Process.pid
 t = Thread.new do
   i = 0
   loop do
-    sleep 2
+    sleep 1
     do_shit(i+=1)
   end
 end

@@ -15,12 +15,12 @@ module Hijack
       end
 
       def hijack_mute(remote)
-        Hijack::Console::OutputReceiver.mute
+        Hijack::OutputReceiver.mute
         true
       end
 
       def hijack_unmute(remote)
-        Hijack::Console::OutputReceiver.unmute(remote)
+        Hijack::OutputReceiver.unmute
         true
       end
 
@@ -28,11 +28,11 @@ module Hijack
         hijack_mute(remote)
         require 'rubygems'
         require 'ruby-debug'
-        remote.evaluate(<<-RB)
+        remote.evaluate(<<-RUBY)
           require 'rubygems'
           require 'ruby-debug'
           Debugger.start_remote
-        RB
+        RUBY
         true
       end
 

@@ -10,6 +10,7 @@ require 'hijack/gdb'
 require 'hijack/payload'
 require 'hijack/helper'
 require 'hijack/workspace'
+require 'hijack/output_receiver'
 
 module Hijack
   def self.start(pid, options)

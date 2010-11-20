@@ -9,13 +9,15 @@ module Hijack
       $stdout.flush
       Payload.inject(@pid)
       connect
+      check_remote_ruby_version
       $stdout.write("\b" * str.size)
       $stdout.flush
       mirror_process
       banner
       execute_file
+      setup_at_exit
       OutputReceiver.start(@remote) unless Hijack.options[:mute]
-      start_irb
+      start_irb      
     end
 
   protected
@@ -37,33 +39,6 @@ module Hijack
         sleep 0.01
       end
       @remote = DRbObject.new(nil, Hijack.socket_for(@pid))
-    end
-
-    module OutputReceiver
-      class << self
-        def mute
-          @mute = true
-        end
-
-        def unmute(remote)
-          start(remote) unless @started
-          @mute = false
-        end
-
-        def write(where, str)
-          Object.const_get(where.upcase).write(str) unless @mute
-        end
-
-        def puts(where, str)
-          Object.const_get(where.upcase).puts(str) unless @mute
-        end
-
-        def start(remote)
-          DRb.start_service(Hijack.socket_for(Process.pid), self)
-          remote.evaluate("__hijack_output_receiver_ready_#{Process.pid}")
-          @started = true
-        end
-      end
     end
 
     def mirror_process
@@ -101,16 +76,15 @@ module Hijack
     end
 
     def start_irb
-      ARGV.replace ["--simple-prompt"]
+      IRB.conf[:PROMPT_MODE] = :SIMPLE
+      IRB.conf[:USE_READLINE] = true
       IRB.setup(nil)
       workspace = Hijack::Workspace.new
       workspace.remote = @remote
       workspace.pid = @pid
       irb = IRB::Irb.new(workspace)
-      @CONF = IRB.instance_variable_get(:@CONF)
-      @CONF[:IRB_RC].call irb.context if @CONF[:IRB_RC]
-      @CONF[:MAIN_CONTEXT] = irb.context
-      @CONF[:PROMPT_MODE] = :SIMPLE
+      IRB.conf[:IRB_RC].call irb.context if IRB.conf[:IRB_RC]
+      IRB.conf[:MAIN_CONTEXT] = irb.context
       trap('SIGINT') { irb.signal_handle }
       catch(:IRB_EXIT) { irb.eval_input }
     end
@@ -118,6 +92,23 @@ module Hijack
     def banner
       script, ruby_version, platform, hijack_version = @remote.evaluate('[$0, RUBY_VERSION, RUBY_PLATFORM]')
       puts "=> Hijacked #{@pid} (#{script}) (ruby #{ruby_version} [#{platform}])"
+    end
+    
+    def check_remote_ruby_version
+      # TODO: Check patch-level.
+      remote_major, remote_minor = remote_ruby_version.split('.')
+      local_major, local_minor = RUBY_VERSION.split('.')
+      if remote_minor != local_minor
+        $stderr.puts "\nWARNING: The process you are hijacking is running Ruby #{remote_ruby_version} yet you are running #{RUBY_VERSION}."
+      end
+    end
+
+    def remote_ruby_version
+      @remote_ruby_version ||= @remote.evaluate("RUBY_VERSION")
+    end
+    
+    def setup_at_exit
+      at_exit { OutputReceiver.stop }
     end
 
     def execute_file

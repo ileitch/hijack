@@ -1,20 +1,19 @@
 module Hijack
-  HijackCompletionProc = proc {|input|
+  Readline.completion_proc = Proc.new do |input|
     bind = IRB.conf[:MAIN_CONTEXT].workspace.binding
     if helpers = Helper.helpers_like(input)
       helpers
     else
       IRB::InputCompletor::CompletionProc.call(input)
     end
-  }
-  Readline.completion_proc = HijackCompletionProc
+  end
 
   class Workspace < IRB::WorkSpace
     attr_accessor :remote, :pid
     def evaluate(context, statements, file = __FILE__, line = __LINE__)
       if statements =~ /IRB\./
         super
-      elsif statements.strip =~ /^exit/
+      elsif statements.strip =~ /^(exit|quit)/
         remote.evaluate('__hijack_exit') rescue nil
         super
       elsif helper = Hijack::Helper.find_helper(statements)
@@ -22,7 +21,7 @@ module Hijack
       else
         begin
           result = remote.evaluate(statements)
-        rescue DRb::DRbConnError
+        rescue DRb::DRbConnError => e
           puts "=> Lost connection to #{@pid}!"
           exit 1
         end
