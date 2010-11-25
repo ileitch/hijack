@@ -13,7 +13,7 @@ date: 2009-09-20 00:00:00 -04:00
 default_executable: 
 dependencies: []
 
-description: Provides an irb session to an existing ruby process.
+description: Provides an irb session to a running ruby process.
 email: port001@gmail.com
 executables: 
 - hijack
@@ -67,6 +67,6 @@ rubyforge_project:
 rubygems_version: 1.3.4
 signing_key: 
 specification_version: 3
-summary: Provides an irb session to an existing ruby process.
+summary: Provides an irb session to a running ruby process.
 test_files: []
 
