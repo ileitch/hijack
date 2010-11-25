@@ -76,6 +76,7 @@ module Hijack
     end
 
     def start_irb
+      ARGV.clear
       IRB.conf[:PROMPT_MODE] = :SIMPLE
       IRB.conf[:USE_READLINE] = true
       IRB.setup(nil)

@@ -2,7 +2,7 @@ module Hijack
   module Helper
     class << self
       def helpers
-        methods.find_all {|meth| meth =~ /^hijack_/}
+        methods.find_all {|meth| meth =~ /^hijack_/}.map { |meth| meth.to_s }
       end
 
       def find_helper(statements)

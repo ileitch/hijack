@@ -40,15 +40,15 @@ module Hijack
       ensure_main_thread_not_blocked_by_join
       set_breakpoint
       continue
-      clear_breakpoint
+      delete_breakpoint
     end
     
     def set_breakpoint
       exec("break rb_call")
     end
 
-    def clear_breakpoint
-      exec("clear rb_call")
+    def delete_breakpoint
+      exec("delete breakpoints")
     end
 
     def ensure_main_thread_not_blocked_by_join

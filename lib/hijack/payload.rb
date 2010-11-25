@@ -40,7 +40,7 @@ module Hijack
 
               def self.start(pid)
                 @remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
-                p @remote if Hijack.debug?
+                puts @remote.inspect if Hijack.debug?
 
                 class << $stdout
                   def write_with_copying(str)
