@@ -29,4 +29,8 @@ module Hijack
   def self.socket_path_for(pid)
     "/tmp/hijack.#{pid}.sock"
   end
+  
+  def self.version
+    "0.2.0.rc1"
+  end
 end

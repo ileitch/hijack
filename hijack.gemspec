@@ -1,7 +1,7 @@
 --- !ruby/object:Gem::Specification 
 name: hijack
 version: !ruby/object:Gem::Version 
-  version: 0.1.9
+  version: 0.2.0.rc1
 platform: ruby
 authors: 
 - Ian Leitch
@@ -14,7 +14,7 @@ default_executable:
 dependencies: []
 
 description: Provides an irb session to an existing ruby process.
-email: ian.leitch@systino.net
+email: port001@gmail.com
 executables: 
 - hijack
 extensions: []
@@ -32,6 +32,7 @@ files:
 - lib/hijack/helper.rb
 - lib/hijack/payload.rb
 - lib/hijack/workspace.rb
+- lib/hijack/output_receiver.rb
 - lib/hijack.rb
 - test/app.rb
 - test/gc.rb
