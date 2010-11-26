@@ -2,6 +2,7 @@ module Hijack
   Readline.completion_proc = Proc.new do |input|
     bind = IRB.conf[:MAIN_CONTEXT].workspace.binding
     if helpers = Helper.helpers_like(input)
+      OutputReceiver.mute_momentarily
       helpers
     else
       IRB::InputCompletor::CompletionProc.call(input)
