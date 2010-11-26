@@ -1,16 +1,15 @@
 require 'rake/gempackagetask'
 require 'yaml'
-
-HIJACK_VERSION = '0.1.9'
+require 'lib/hijack'
 
 task :clean => :clobber_package
 
 spec = Gem::Specification.new do |s|  
   s.name                  = 'hijack'
-  s.version               = HIJACK_VERSION
+  s.version               = Hijack.version
   s.platform              = Gem::Platform::RUBY
   s.summary               = 
-  s.description           = 'Provides an irb session to an existing ruby process.'
+  s.description           = 'Provides an irb session to a running ruby process.'
   s.author                = "Ian Leitch"
   s.email                 = 'ian.leitch@systino.net'
   s.homepage              = 'http://github.com/ileitch/hijack'
