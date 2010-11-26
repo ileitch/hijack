@@ -11,7 +11,7 @@ spec = Gem::Specification.new do |s|
   s.summary               = 
   s.description           = 'Provides an irb session to a running ruby process.'
   s.author                = "Ian Leitch"
-  s.email                 = 'ian.leitch@systino.net'
+  s.email                 = 'port001@gmail.com'
   s.homepage              = 'http://github.com/ileitch/hijack'
   s.has_rdoc              = false
   s.files                 = %w(COPYING TODO README.rdoc Rakefile) + Dir.glob("{lib,test,tasks,bin,examples}/**/*")
@@ -25,8 +25,8 @@ Rake::GemPackageTask.new(spec) do |p|
 end
 
 namespace :gem do
-  desc "Update the gemspec for GitHub's gem server"
-  task :github do
+  desc "Update the gemspec"
+  task :spec do
     File.open("hijack.gemspec", 'w') { |f| f << YAML.dump(spec) }
   end  
 end

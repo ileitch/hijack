@@ -1,7 +1,14 @@
 --- !ruby/object:Gem::Specification 
 name: hijack
 version: !ruby/object:Gem::Version 
-  version: 0.2.0.rc1
+  hash: 977940575
+  prerelease: true
+  segments: 
+  - 0
+  - 2
+  - 0
+  - rc2
+  version: 0.2.0.rc2
 platform: ruby
 authors: 
 - Ian Leitch
@@ -9,7 +16,7 @@ autorequire:
 bindir: bin
 cert_chain: []
 
-date: 2009-09-20 00:00:00 -04:00
+date: 2010-11-26 00:00:00 +11:00
 default_executable: 
 dependencies: []
 
@@ -30,9 +37,9 @@ files:
 - lib/hijack/console.rb
 - lib/hijack/gdb.rb
 - lib/hijack/helper.rb
+- lib/hijack/output_receiver.rb
 - lib/hijack/payload.rb
 - lib/hijack/workspace.rb
-- lib/hijack/output_receiver.rb
 - lib/hijack.rb
 - test/app.rb
 - test/gc.rb
@@ -50,21 +57,29 @@ rdoc_options: []
 require_paths: 
 - lib
 required_ruby_version: !ruby/object:Gem::Requirement 
+  none: false
   requirements: 
   - - ">="
     - !ruby/object:Gem::Version 
+      hash: 3
+      segments: 
+      - 0
       version: "0"
-  version: 
 required_rubygems_version: !ruby/object:Gem::Requirement 
+  none: false
   requirements: 
-  - - ">="
+  - - ">"
     - !ruby/object:Gem::Version 
-      version: "0"
-  version: 
+      hash: 25
+      segments: 
+      - 1
+      - 3
+      - 1
+      version: 1.3.1
 requirements: []
 
 rubyforge_project: 
-rubygems_version: 1.3.4
+rubygems_version: 1.3.7
 signing_key: 
 specification_version: 3
 summary: Provides an irb session to a running ruby process.
