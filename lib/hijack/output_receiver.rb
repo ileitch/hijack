@@ -17,8 +17,10 @@ module Hijack
     end
     
     def self.stop
-      Process.kill("KILL", @pid)
-      Process.waitpid(@pid)
+      if started?
+        Process.kill("KILL", @pid)
+        Process.waitpid(@pid)
+      end
     end
 
     def self.mute
@@ -40,7 +42,7 @@ module Hijack
     def start
       setup_signal_traps
       DRb.start_service(Hijack.socket_for(Process.pid), self)
-      @remote.evaluate("__hijack_output_receiver_ready_#{Process.pid}")
+      @remote.evaluate("OutputCopier.start(#{Process.pid})")
       DRb.thread.join
     end
         

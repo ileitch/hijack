@@ -15,7 +15,7 @@ module Hijack
       if statements =~ /IRB\./
         super
       elsif statements.strip =~ /^(exit|quit)/
-        remote.evaluate('__hijack_exit') rescue nil
+        remote.evaluate('Hijack.stop') rescue nil
         super
       elsif helper = Hijack::Helper.find_helper(statements)
         Hijack::Helper.send(helper, remote)

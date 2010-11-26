@@ -39,7 +39,7 @@ module Hijack
               end
 
               def self.start(pid)
-                @remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid + '.sock')
+                @remote = DRbObject.new(nil, 'drbunix://tmp/hijack.' + pid.to_s + '.sock')
                 puts @remote.inspect if Hijack.debug?
 
                 class << $stdout
@@ -75,19 +75,10 @@ module Hijack
             class Evaluator
               def initialize(context)
                 @context = context
-                @file = __FILE__
               end
 
               def evaluate(rb)
-                if rb =~ /__hijack_output_receiver_ready_([\\d]+)/
-                  OutputCopier.start($1)
-                elsif rb =~ /__hijack_get_remote_file_name/
-                  @file
-                elsif rb =~ /__hijack_exit/
-                  Hijack.stop
-                else
-                  @context.instance_eval(rb)
-                end
+                @context.instance_eval(rb)
               end
             end
 
