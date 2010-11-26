@@ -8,7 +8,7 @@ module Hijack
       end
       gdb = GDB.new(pid)
       gdb.eval(payload(pid))
-      gdb.detach
+      gdb.quit
       exit if @received_sigint
     end
 
