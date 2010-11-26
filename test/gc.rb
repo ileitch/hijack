@@ -7,7 +7,7 @@ class MyObject
 end
 
 puts Process.pid
-n = 0
+n = 10000
 loop do
   (n+=1).times {|i| MyObject.new(i)}
   GC.start
