@@ -1,6 +1,6 @@
 require 'rake/gempackagetask'
 require 'yaml'
-require 'lib/hijack'
+require './lib/hijack'
 
 task :clean => :clobber_package
 
