@@ -119,3 +119,7 @@ DRb cannot dump objects to the hijack client for types that are not loaded in th
 isn't loaded in the hijack client.
 
 To work around this, when hijack connects to a remote process it will inspect all the files required by the process and also attempt to require them itself. This may not work for all object types however so you may still get a warning when an object cannot be dumped.
+
+== Contributors
+
+* jugyo (十行) (https://github.com/jugyo)
