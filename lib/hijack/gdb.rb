@@ -49,7 +49,7 @@ module Hijack
       unless attached
         puts
         puts "=> Tried 3 times to attach to #{@pid} whilst GC wasn't running but failed."
-        puts "=> This means either the process calls GC.start frequently or its GC runs are slow - try hijacking again."
+        puts "=> This means either the process calls GC.start frequently or GC runs are slow - try hijacking again."
         exit 1
       end
 
