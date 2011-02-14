@@ -58,7 +58,7 @@ module Hijack
     end
     
     def during_gc?
-      backtrace.any? { |line| line =~ /garbage_collect/i }
+      !!(call("(int)rb_during_gc()").first =~ /\$[\d]+ = 1/)
     end
     
     def detach

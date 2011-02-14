@@ -12,7 +12,7 @@ p Process.pid
 t = Thread.new do
   i = 0
   loop do
-    Array.new(1000000).collect {|i| "#{i}"}
+    Array.new(3000000).collect {|n| "#{n}"}
     do_shit(i+=1)
   end
 end
