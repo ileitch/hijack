@@ -1,14 +1,14 @@
 --- !ruby/object:Gem::Specification 
 name: hijack
 version: !ruby/object:Gem::Version 
-  hash: 977940575
+  hash: 977940572
   prerelease: true
   segments: 
   - 0
   - 2
   - 0
-  - rc2
-  version: 0.2.0.rc2
+  - rc3
+  version: 0.2.0.rc3
 platform: ruby
 authors: 
 - Ian Leitch
@@ -16,7 +16,7 @@ autorequire:
 bindir: bin
 cert_chain: []
 
-date: 2010-11-26 00:00:00 +11:00
+date: 2011-02-15 00:00:00 +11:00
 default_executable: 
 dependencies: []
 
