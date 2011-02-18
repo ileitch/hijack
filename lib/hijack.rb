@@ -31,6 +31,6 @@ module Hijack
   end
 
   def self.version
-    "0.2.0.rc3"
+    "0.2.0"
   end
 end
