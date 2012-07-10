@@ -25,7 +25,7 @@ module Hijack
   protected
 
     def previous_frame_inner_to_this_frame?
-      backtrace.first =~ /previous frame inner to this frame/i
+      backtrace.last =~ /previous frame inner to this frame/i
     end
 
     def attach_outside_gc
@@ -53,29 +53,39 @@ module Hijack
         exit 1
       end
 
-      # TODO: Check for "Unable to attach to process-id 44528: No child processes (10)"
-      ensure_main_thread_not_blocked_by_join
+      break_on_safe_stack_unwind
     end
-    
+
+    def break_on_safe_stack_unwind
+      safe = false
+      backtrace.each do |line|
+        # vm_call_method == 1.9, rb_call == 1.8
+        if line =~ /(vm_call_method|rb_call)/
+          frame = line.match(/^\#([\d]+)/)[1]
+          safe = true
+          exec("frame #{frame}")
+          exec("break")
+          exec("continue")
+          exec("delete 1")
+          break
+        end
+      end
+
+      if !safe
+        puts "=> WARNING: Did not detect a safe frame on which to set a breakpoint, hijack may fail."
+      end
+    end
+
     def during_gc?
       !!(call("(int)rb_during_gc()").first =~ /\$[\d]+ = 1/)
     end
-    
+
     def detach
       exec("detach")
     end
-    
+
     def attach
       exec("attach #{@pid}")
-    end
-    
-    def ensure_main_thread_not_blocked_by_join
-      if backtrace.any? { |line| line =~ /rb_thread_join/ }
-        puts "\n=> Unable to hijack #{@pid} because the main thread is blocked waiting for another thread to join."
-        puts "=> Check that you are using the most recent version of hijack, a newer version may have solved this shortcoming."
-        detach
-        exit 1
-      end
     end
 
     def ensure_attached_to_ruby_process
@@ -87,7 +97,7 @@ module Hijack
     end
 
     def backtrace
-      @backtrace ||= exec('bt').reverse
+      @backtrace ||= exec('bt')
     end
 
     def continue
@@ -99,7 +109,7 @@ module Hijack
     end
 
     def exec(str)
-      puts("(gdb) #{str}") if @verbose
+      puts str if @verbose
       @gdb.puts(str)
       wait
     end
@@ -111,6 +121,7 @@ module Hijack
         next if result.empty?
         c = @gdb.read(1)
         break if c.nil?
+        STDOUT.write(c) if @verbose
         line << c
         break if line == "(gdb) " || line == " >"
         if line[-1] == ?\n
@@ -118,7 +129,6 @@ module Hijack
           line = ""
         end
       end
-      puts lines.map { |l| "> #{l}" } if @verbose
       lines
     end
   end
