@@ -1,33 +1,33 @@
---- !ruby/object:Gem::Specification 
+--- !ruby/object:Gem::Specification
 name: hijack
-version: !ruby/object:Gem::Version 
+version: !ruby/object:Gem::Version
   hash: 23
   prerelease: false
-  segments: 
+  segments:
   - 0
   - 2
-  - 0
-  version: 0.2.0
+  - 1
+  version: 0.2.1
 platform: ruby
-authors: 
+authors:
 - Ian Leitch
-autorequire: 
+autorequire:
 bindir: bin
 cert_chain: []
 
 date: 2011-02-18 00:00:00 +11:00
-default_executable: 
+default_executable:
 dependencies: []
 
 description: Provides an irb session to a running ruby process.
 email: port001@gmail.com
-executables: 
+executables:
 - hijack
 extensions: []
 
 extra_rdoc_files: []
 
-files: 
+files:
 - COPYING
 - TODO
 - README.rdoc
@@ -50,34 +50,34 @@ has_rdoc: true
 homepage: http://github.com/ileitch/hijack
 licenses: []
 
-post_install_message: 
+post_install_message:
 rdoc_options: []
 
-require_paths: 
+require_paths:
 - lib
-required_ruby_version: !ruby/object:Gem::Requirement 
+required_ruby_version: !ruby/object:Gem::Requirement
   none: false
-  requirements: 
+  requirements:
   - - ">="
-    - !ruby/object:Gem::Version 
+    - !ruby/object:Gem::Version
       hash: 3
-      segments: 
+      segments:
       - 0
       version: "0"
-required_rubygems_version: !ruby/object:Gem::Requirement 
+required_rubygems_version: !ruby/object:Gem::Requirement
   none: false
-  requirements: 
+  requirements:
   - - ">="
-    - !ruby/object:Gem::Version 
+    - !ruby/object:Gem::Version
       hash: 3
-      segments: 
+      segments:
       - 0
       version: "0"
 requirements: []
 
-rubyforge_project: 
+rubyforge_project:
 rubygems_version: 1.3.7
-signing_key: 
+signing_key:
 specification_version: 3
 summary: Provides an irb session to a running ruby process.
 test_files: []
