@@ -5,7 +5,7 @@ module Hijack
     def initialize(pid)
       @pid = pid
       @verbose = Hijack.options[:debug]
-      @exec_path = File.join(Config::CONFIG['bindir'], Config::CONFIG['RUBY_INSTALL_NAME'] + Config::CONFIG['EXEEXT'])
+      @exec_path = File.join(RbConfig::CONFIG['bindir'], RbConfig::CONFIG['RUBY_INSTALL_NAME'] + RbConfig::CONFIG['EXEEXT'])
       attach_outside_gc
     end
 
@@ -97,7 +97,7 @@ module Hijack
     end
 
     def backtrace
-      @backtrace ||= exec('bt')
+      exec('bt')
     end
 
     def continue

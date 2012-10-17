@@ -2,6 +2,8 @@
 require 'rubygems'
 require 'sinatra'
 
+$count = 0
+
 get '/' do
-    'You got it'
+  "Hello! #{$count += 1}"
 end
