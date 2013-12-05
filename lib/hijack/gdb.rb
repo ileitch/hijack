@@ -10,7 +10,8 @@ module Hijack
     end
 
     def eval(cmd)
-      call("(void)rb_eval_string(#{cmd.strip.gsub(/"/, '\"').inspect})")
+      evaled_cmd = cmd.strip.gsub(/"/, '\"').inspect
+      call("(void)rb_eval_string(#{evaled_cmd})")
     end
 
     def quit
@@ -22,14 +23,25 @@ module Hijack
       @gdb = nil
     end
 
-  protected
+    protected
 
     def previous_frame_inner_to_this_frame?
       backtrace.last =~ /previous frame inner to this frame/i
     end
 
+    def gdb_path
+      # Check for gdb
+      if File.exists?(`which gdb`.strip)
+        `which gdb`.strip
+      elsif File.exists?(`which ggdb`.strip)
+        `which ggdb`.strip
+      else
+        raise "Cannot find suitable gdb!"
+      end
+    end
+
     def attach_outside_gc
-      @gdb = IO.popen("gdb -q #{@exec_path} #{@pid} 2>&1", 'r+')
+      @gdb = IO.popen("#{gdb_path} -q #{@exec_path} #{@pid} 2>&1", 'r+')
       wait
       ensure_attached_to_ruby_process
       attached = false

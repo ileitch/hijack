@@ -1,14 +1,16 @@
-require 'rake/gempackagetask'
+# require 'rake/packagetask'
+require 'rubygems'
+require 'rubygems/package_task'
 require 'yaml'
 require './lib/hijack'
 
 task :clean => :clobber_package
 
-spec = Gem::Specification.new do |s|  
+spec = Gem::Specification.new do |s|
   s.name                  = 'hijack'
   s.version               = Hijack.version
   s.platform              = Gem::Platform::RUBY
-  s.summary               = 
+  s.summary               =
   s.description           = 'Provides an irb session to a running ruby process.'
   s.author                = "Ian Leitch"
   s.email                 = 'port001@gmail.com'
@@ -20,15 +22,16 @@ spec = Gem::Specification.new do |s|
   s.require_path          = "lib"
 end
 
-Rake::GemPackageTask.new(spec) do |p|
-  p.gem_spec = spec
+Gem::PackageTask.new(spec) do |pkg|
+  pkg.need_zip = true
+  pkg.need_tar = true
 end
 
 namespace :gem do
   desc "Update the gemspec"
   task :spec do
     File.open("hijack.gemspec", 'w') { |f| f << YAML.dump(spec) }
-  end  
+  end
 end
 
 task :install => [:clean, :clobber, :package] do
