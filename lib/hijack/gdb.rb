@@ -27,9 +27,20 @@ module Hijack
     def previous_frame_inner_to_this_frame?
       backtrace.last =~ /previous frame inner to this frame/i
     end
+    
+    def gdb_path
+      # Check for gdb
+      if File.exists?(`which gdb`)
+        `which gdb`.strip
+      elsif File.exists?(`which ggdb`)
+        `which ggdb`.strip
+      else
+        raise "Cannot find suitable gdb!"
+      end
+    end
 
     def attach_outside_gc
-      @gdb = IO.popen("gdb -q #{@exec_path} #{@pid} 2>&1", 'r+')
+      @gdb = IO.popen("#{gdb_path} -q #{@exec_path} #{@pid} 2>&1", 'r+')
       wait
       ensure_attached_to_ruby_process
       attached = false
